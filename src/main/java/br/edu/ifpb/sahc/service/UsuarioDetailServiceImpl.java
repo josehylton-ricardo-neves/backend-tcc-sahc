@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import br.edu.ifpb.sahc.model.UsuarioModel;
+import br.edu.ifpb.sahc.model.Usuario;
 import br.edu.ifpb.sahc.repository.UsuarioRepository;
 import br.edu.ifpb.sahc.security.UsuarioSecurity;
 
@@ -16,17 +16,13 @@ import br.edu.ifpb.sahc.security.UsuarioSecurity;
 public class UsuarioDetailServiceImpl implements UserDetailsService {
 
 	@Autowired
-	private UsuarioRepository userRepository;
+	private UsuarioRepository usuarioRepository;
 
-	/*
-	public UsuarioDetailServiceImpl() {
-		
-	}*/
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		
-		Optional<UsuarioModel> usuario = userRepository.findByRegistry(username);
+		Optional<Usuario> usuario = usuarioRepository.findByMatricula(username);
 		
 		if(usuario.isEmpty()) {
 			throw new UsernameNotFoundException("Usuario " + username + " não encontrado.");

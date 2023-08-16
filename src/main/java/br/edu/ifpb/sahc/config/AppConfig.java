@@ -12,9 +12,5 @@ public class AppConfig {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		return passwordEncoder;
 	}
-	
-	/*@Bean
-	public AuthenticationManager authenticationManager() {
-		return new AuthenticationManager;
-	}*/
+
 }

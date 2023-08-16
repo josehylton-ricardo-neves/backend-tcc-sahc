@@ -1,46 +1,51 @@
 package br.edu.ifpb.sahc.controller;
 
+import javax.validation.Valid;
+
+import br.edu.ifpb.sahc.dto.usuario.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import br.edu.ifpb.sahc.dto.UsuarioRequest;
-import br.edu.ifpb.sahc.dto.UsuarioResponse;
-import br.edu.ifpb.sahc.model.UsuarioModel;
 import br.edu.ifpb.sahc.service.UsuarioService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+import java.util.List;
 
 @RestController
+@Api( tags = "usuario-controller")
 public class UsuarioController {
 	
 	@Autowired
 	private UsuarioService usuarioService;
 
-	
-	@PostMapping("/")
-	public String Login(@RequestBody UsuarioModel usuario) {
-		System.out.println(usuario.toString());
-		return "retorno Schedule";
+	@ApiOperation(value = "Metodo usado para realizar o login no sistema")
+	@PostMapping("/login")
+	public void Login(@Valid @RequestBody LoginUsuario usuario) {
 	}
 	
+	@ApiOperation(value = "Metodo usado para cadastrar um usuario no sistema")
 	@PostMapping("/cadastrarUsuario")
-	public ResponseEntity<UsuarioResponse> registerUser(@RequestBody UsuarioModel usuario) {
-		return usuarioService.registrarUsuario(usuario.getMatricula(), usuario.getNome(), usuario.getEmail(), usuario.getSenha(), usuario.getRole());
+	public ResponseEntity<UsuarioResponse> cadastrarUsuario(@Valid @RequestBody CadastrarUsuario usuario) {
+		return usuarioService.cadastrarUsuario(usuario);
+	}
+	@ApiOperation(value = "Metodo usado para buscar todos os usuários cadastrados")
+	@GetMapping("/buscarUsuarios")
+	public ResponseEntity<List<UsuarioList>> buscasUsuarios(@RequestHeader (value = "Authorization" ) String token) {
+		return usuarioService.buscarUsuario();
 	}
 	
+	@ApiOperation(value = "Metodo usado para modificar a senha do usuario")
 	@PatchMapping("/modificarSenha")
-	public ResponseEntity<UsuarioResponse> modificarSenha(@RequestBody UsuarioRequest usuario, @RequestHeader(value = "Authorization") String header) {
-		return usuarioService.modificarSenha(usuario.getMatricula(), usuario.getSenha(), usuario.getNovaSenha(), header);
+	public ResponseEntity<UsuarioResponse> modificarSenha(@Valid @RequestBody ModificarSenhaUsuario usuario, @RequestHeader(value = "Authorization") String token) {
+		return usuarioService.modificarSenha(usuario.getMatricula(), usuario.getSenhaAtual(), usuario.getNovaSenha(), usuarioService.adquireUsuario(token));
 	}
-	
-	@Secured("ROLE_ADMIN")
-	//@PreAuthorize("hasRole('ROLE_ADMIN')")
+
+	@ApiOperation(value = "Metodo usado para recuperar a senha do usuario")
 	@PostMapping("/recuperarSenha")
-	public ResponseEntity<UsuarioResponse> recuperarSenha(@RequestBody UsuarioRequest usuario) {
+	public ResponseEntity<UsuarioResponse> recuperarSenha(@Valid @RequestBody RecuperarSenhaUsuario usuario) {
 		return usuarioService.recuperarSenha(usuario.getMatricula(), usuario.getEmail());
 	}
+
 }

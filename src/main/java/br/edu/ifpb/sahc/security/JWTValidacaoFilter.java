@@ -13,10 +13,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 
 import br.edu.ifpb.sahc.service.UsuarioDetailServiceImpl;
-//import jakarta.servlet.FilterChain;
-//import jakarta.servlet.ServletException;
-//import jakarta.servlet.http.HttpServletRequest;
-//import jakarta.servlet.http.HttpServletResponse;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -53,11 +49,8 @@ public class JWTValidacaoFilter extends OncePerRequestFilter {
         }
 
         token = token.replace(PREFIX_ATTRIBUTE, "");
-        
-        
-        
+
         try {
-        	
         	String user = JWT.require(Algorithm.HMAC512(JWTAutenticacaoFilter.TOKEN_CODE))
                     .build()
                     .verify(token)
@@ -66,33 +59,14 @@ public class JWTValidacaoFilter extends OncePerRequestFilter {
         	UserDetails userDetails = userDetailServiceImpl.loadUserByUsername(user);
         	
         	UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user,null, userDetails.getAuthorities());
-        	
-        	//authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        	System.out.println("TESTE TOKEN: " + authenticationToken);
-        	
+
         	SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         	
         	chain.doFilter(request, response);
         	
         }catch (TokenExpiredException e) {
-        	System.out.println("OCORREU UM ERRO NO TOKEN");
 			throw new TokenExpiredException("Token invalido " + e);
 		}
-        
-        //UsernamePasswordAuthenticationToken authenticationToken = getAuthenticationToken(token);
-    
     }
 
-	
-	private UsernamePasswordAuthenticationToken getAuthenticationToken(String token) {
-
-        String user = JWT.require(Algorithm.HMAC512(JWTAutenticacaoFilter.TOKEN_CODE)).build().verify(token).getSubject();
-
-        if (user == null) {
-            return null;
-        }
-        
-        UserDetails userDetails = userDetailServiceImpl.loadUserByUsername(user);
-        return new UsernamePasswordAuthenticationToken(user,null, userDetails.getAuthorities());
-    }
 }

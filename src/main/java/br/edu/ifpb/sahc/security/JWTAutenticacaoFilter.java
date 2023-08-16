@@ -17,11 +17,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import br.edu.ifpb.sahc.model.UsuarioModel;
-//import jakarta.servlet.FilterChain;
-//import jakarta.servlet.ServletException;
-//import jakarta.servlet.http.HttpServletRequest;
-//import jakarta.servlet.http.HttpServletResponse;
+import br.edu.ifpb.sahc.model.Usuario;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -31,14 +27,14 @@ import javax.servlet.http.HttpServletResponse;
 
 public class JWTAutenticacaoFilter extends UsernamePasswordAuthenticationFilter {
 	
-	public static final int EXPIRATION_TOKEN_TIME = 6000000;
-	//public static final int EXPIRATION_TOKEN_TIME = 10000;
+	//token com duração de 2 horas
+	public static final int EXPIRATION_TOKEN_TIME = 7200000;
+	//codigo do token
     public static final String TOKEN_CODE = "463408a1-54c9-4307-bb1c-6cced559f5a7";
     
     
     private AuthenticationFailureHandler failureHandler = new SimpleUrlAuthenticationFailureHandler();
 
-    //@Autowired
 	private final AuthenticationManager authenticationManager;
     
     public JWTAutenticacaoFilter(AuthenticationManager authenticationManager) {
@@ -50,8 +46,8 @@ public class JWTAutenticacaoFilter extends UsernamePasswordAuthenticationFilter 
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 		
 		try {
-            UsuarioModel user = new ObjectMapper()
-                    .readValue(request.getInputStream(), UsuarioModel.class);
+            Usuario user = new ObjectMapper()
+                    .readValue(request.getInputStream(), Usuario.class);
             
             return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
             		user.getMatricula(),
@@ -72,11 +68,12 @@ public class JWTAutenticacaoFilter extends UsernamePasswordAuthenticationFilter 
 		
 		String token = JWT.create()
 				.withSubject(userDate.getUsername())
+				.withClaim("role", userDate.getAuthorities().toString().replace("ROLE_", "").replace("[","").replace("]",""))
 				.withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TOKEN_TIME))
 				.sign(Algorithm.HMAC512(TOKEN_CODE));
 
-		response.getWriter().write(token);
-		response.getWriter().flush();
+		response.setHeader(JWTValidacaoFilter.HEADER_ATTRIBUTE, JWTValidacaoFilter.PREFIX_ATTRIBUTE + token);
+
 	}
 	
 	

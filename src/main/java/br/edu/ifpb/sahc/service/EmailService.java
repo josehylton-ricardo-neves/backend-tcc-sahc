@@ -27,6 +27,7 @@ public class EmailService {
 			javaMailSender.send(simpleMailMessage);
 			
 			return "Email Enviado com Sucesso";
+
 		} catch (Exception e) {
 			return "Erro ao Enviar o Email";
 		}
